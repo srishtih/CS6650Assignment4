@@ -17,7 +17,7 @@ import java.util.concurrent.TimeoutException;
 public class Consumer {
     protected static final String QUEUE_NAME = "tester";
     private static final Integer NUM_THREADS = 1000;
-    public static final JedisPool jPool = new JedisPool("35.165.209.121", 6379);
+    public static final JedisPool jPool = new JedisPool(PROTOCOL.DEFAULT_HOST, 6379);
 
 
     /**
