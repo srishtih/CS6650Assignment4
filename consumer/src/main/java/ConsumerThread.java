@@ -86,11 +86,12 @@ public class ConsumerThread implements Runnable {
             dbConnection = Consumer.jPool.getResource();
             dbConnection.hmset("skier:"+skierID, event);
             dbConnection.sadd("LiftRides", "skier:"+skierID);
-
+            System.out.println("Success!!");
             Consumer.jPool.returnResource(dbConnection);
             return true;
         } catch(Exception e){
-            System.out.println(e.getMessage());
+            e.printStackTrace();
+//            System.out.println(e.getMessage());
             return false;
         }
     }

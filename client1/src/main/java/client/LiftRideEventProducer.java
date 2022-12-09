@@ -14,7 +14,7 @@ public class LiftRideEventProducer implements Runnable {
     private static final int MINIMUM_ID = 1;
     private static final int LAST_RESORT_ID = 10;
     private static final int LAST_SKIER_ID = 100000;
-    private static final int LAST_DAY_ID = 360;
+    private static final int LAST_DAY_ID = 3;
     private static final int LAST_LIFT_ID = 40;
     private final int requestCount;
     public EventBuffer eventBuffer;

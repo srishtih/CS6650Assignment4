@@ -17,7 +17,7 @@ import java.util.concurrent.TimeoutException;
 public class Consumer {
     protected static final String QUEUE_NAME = "tester";
     private static final Integer NUM_THREADS = 1000;
-    public static final JedisPool jPool = new JedisPool(PROTOCOL.DEFAULT_HOST, 6379);
+    public static final JedisPool jPool = new JedisPool(Protocol.DEFAULT_HOST, 6379);
 
 
     /**
@@ -29,9 +29,10 @@ public class Consumer {
     public static void main(String[] args) throws TimeoutException, IOException {
         //Initialization
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("54.203.66.122");
-        factory.setUsername("admin");
-        factory.setPassword("rabbitmq");
+        factory.setHost("localhost");
+        factory.setPort(5672);
+//        factory.setUsername("admin");
+//        factory.setPassword("rabbitmq");
         Connection connection = factory.newConnection();
 
         //Use thread pool for churning out consumers

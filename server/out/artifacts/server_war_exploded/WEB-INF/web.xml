@@ -11,4 +11,8 @@
         <servlet-name>SkiLiftRideServlet</servlet-name>
         <url-pattern>/skiers/*</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SkiLiftRideServlet</servlet-name>
+        <url-pattern>/resorts/*</url-pattern>
+    </servlet-mapping>
 </web-app>

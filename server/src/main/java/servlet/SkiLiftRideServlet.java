@@ -7,7 +7,7 @@ import model.SkiLiftRide;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import org.apache.commons.lang3.concurrent.EventCountCircuitBreaker;
+
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -35,6 +35,9 @@ public class SkiLiftRideServlet extends HttpServlet {
     private static final int NUM_CHANNELS = 20;
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private final Pattern urlPattern = Pattern.compile("/\\d+/seasons/\\d+/day/\\d+/skier/\\d+");
+    private final Pattern GET1 = Pattern.compile("/\\d+/seasons/\\d+/day/\\d+/skiers");
+    private final Pattern GET2 = Pattern.compile("/\\d+/seasons/\\d+/days/\\d+/skiers/\\d+");
+    private final Pattern GET3 = Pattern.compile("/\\d+/vertical");
     private Connection connection;
     private String QUEUE_NAME = "tester";
     private BlockingQueue<Channel> channelPool;
@@ -46,9 +49,9 @@ public class SkiLiftRideServlet extends HttpServlet {
     @Override
     public void init(){
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("54.203.66.122");
-        factory.setUsername("admin");
-        factory.setPassword("rabbitmq");
+        factory.setHost("localhost");
+//        factory.setUsername("admin");
+//        factory.setPassword("rabbitmq");
         try {
             //One time connection establishment to EC2 instance hosting RabbitMQ
             this.connection= factory.newConnection();
@@ -79,7 +82,32 @@ public class SkiLiftRideServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
-        out.println("<h1>You are doing okay!</h1>");
+
+        String urlPath = request.getPathInfo();     // reads the path specified in request, it contains path parameters
+        System.out.println(urlPath);
+        if (urlPath == null || urlPath.isEmpty()) {
+            //if the url path specified is null or empty, send a response with error code and error message
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().write("No path specified");
+            return;
+        } else if (!GET1.matcher(urlPath).matches()
+                && !GET2.matcher(urlPath).matches()
+                && !GET3.matcher(urlPath).matches() ) {
+            // if the url sent is not in the specified format(that matches Pattern urlPattern),
+            // the values read from splitting this url, do not give us valid values. In this case, send error
+            // code and error message
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("The path specified is invalid");
+            return;
+        }
+        if (GET1.matcher(urlPath).matches()) {
+            out.println("YOU HIT PATTERN 1!</h1>");
+        } else if (GET2.matcher(urlPath).matches()) {
+            out.println("YOU HIT PATTERN 2!</h1>");
+        } else if (GET3.matcher(urlPath).matches()) {
+            out.println("YOU HIT PATTERN 3!</h1>");
+        }
+
     }
 
     /**

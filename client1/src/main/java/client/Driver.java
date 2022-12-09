@@ -27,7 +27,7 @@ public class Driver {
     protected static final double AVG_RESPONSE_TIME = 25.0; //Obtained by sending 10K requests on single thread(time taken/10,000)
 
     public static void main(String[] args) throws InterruptedException {
-       String serverAddress = "http://52.43.193.145:8080/server_war2/"; //Address of remote server
+       String serverAddress = "http://localhost:8080/server_war_exploded/"; //Address of remote server
 
        EventBuffer events = new EventBuffer();  // Shared buffer that contains all lift ride events
        LiftRideEventProducer producer = new LiftRideEventProducer(events, REQUEST_COUNT);   // Creation of lift ride event
