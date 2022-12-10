@@ -38,10 +38,11 @@
             <artifactId>amqp-client</artifactId>
             <version>5.16.0</version>
         </dependency>
-
-
-
-
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>4.3.1</version>
+        </dependency>
     </dependencies>
 
     <properties>
