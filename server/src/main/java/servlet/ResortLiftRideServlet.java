@@ -7,6 +7,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Protocol;
 
 import javax.servlet.ServletException;
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.Duration;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeoutException;
@@ -28,7 +30,8 @@ public class ResortLiftRideServlet extends HttpServlet {
     private BlockingQueue<Channel> channelPool;
     private String QUEUE_NAME = "resort";
     Gson g  = new Gson();
-    public static final JedisPool jPool = new JedisPool(Protocol.DEFAULT_HOST, 6379);
+    public static final JedisPool jPool = new JedisPool(buildPoolConfig(), Protocol.DEFAULT_HOST, 6379);
+
     Jedis dbConnection;
 
     private final String SEASONS_PARAMETER = "seasons";
@@ -92,9 +95,9 @@ public class ResortLiftRideServlet extends HttpServlet {
             String resort_composite_key = createCompositeKey(urlParts);
             // connect with jedis
             // return the number of skiers
-//            dbConnection = jPool.getResource();
-//            Long numberOfSkiers = dbConnection.scard(resort_composite_key);
-            values.addProperty("resort", "Mission Ridge");
+            dbConnection = jPool.getResource();
+            Long numberOfSkiers = dbConnection.scard(resort_composite_key);
+            values.addProperty("resort", numberOfSkiers);
             values.addProperty("numOfSkiers", "123");
             response.getWriter().write(g.toJson(values));
         }
@@ -125,5 +128,14 @@ public class ResortLiftRideServlet extends HttpServlet {
         String dayId = String.valueOf(Integer.parseInt(urlParts[5]));
 
         return resortId + ":" + seasonId + ":" + dayId;
+    }
+
+    private static JedisPoolConfig buildPoolConfig() {
+        JedisPoolConfig poolConfig = new JedisPoolConfig();
+        poolConfig.setMaxTotal(128);
+        poolConfig.setMaxWait(Duration.ofMillis(2000));
+        poolConfig.setBlockWhenExhausted(true);
+        poolConfig.setTestOnBorrow(true);
+        return poolConfig;
     }
 }
