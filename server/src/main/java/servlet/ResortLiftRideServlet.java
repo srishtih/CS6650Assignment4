@@ -97,8 +97,8 @@ public class ResortLiftRideServlet extends HttpServlet {
             // return the number of skiers
             dbConnection = jPool.getResource();
             Long numberOfSkiers = dbConnection.scard(resort_composite_key);
-            values.addProperty("resort", numberOfSkiers);
-            values.addProperty("numOfSkiers", "123");
+            values.addProperty("resort", "Mission Ridge");
+            values.addProperty("numOfSkiers", numberOfSkiers);
             response.getWriter().write(g.toJson(values));
         }
     }
