@@ -1,26 +1,28 @@
 package servlet;
 
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.Channel;
-import model.SkiLiftRide;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import model.SkiLiftRide;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.Protocol;
 
-
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
+
+;
 
 /**
  * @author srish
@@ -35,12 +37,14 @@ public class SkiLiftRideServlet extends HttpServlet {
     private static final int NUM_CHANNELS = 20;
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private final Pattern urlPattern = Pattern.compile("/\\d+/seasons/\\d+/day/\\d+/skier/\\d+");
-    private final Pattern GET1 = Pattern.compile("/\\d+/seasons/\\d+/day/\\d+/skiers");
     private final Pattern GET2 = Pattern.compile("/\\d+/seasons/\\d+/days/\\d+/skiers/\\d+");
     private final Pattern GET3 = Pattern.compile("/\\d+/vertical");
     private Connection connection;
     private String QUEUE_NAME = "tester";
     private BlockingQueue<Channel> channelPool;
+    public static final JedisPool jPool = new JedisPool(Protocol.DEFAULT_HOST, 6379);
+    Gson gObject  = new Gson();
+    Jedis dbConnection;
 
     /**
      * init() method allows the servlet to read persistent configuration data, initialize resources,
@@ -50,8 +54,6 @@ public class SkiLiftRideServlet extends HttpServlet {
     public void init(){
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
-//        factory.setUsername("admin");
-//        factory.setPassword("rabbitmq");
         try {
             //One time connection establishment to EC2 instance hosting RabbitMQ
             this.connection= factory.newConnection();
@@ -81,17 +83,14 @@ public class SkiLiftRideServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/html");
-        PrintWriter out = response.getWriter();
-
         String urlPath = request.getPathInfo();     // reads the path specified in request, it contains path parameters
-        System.out.println(urlPath);
+
         if (urlPath == null || urlPath.isEmpty()) {
             //if the url path specified is null or empty, send a response with error code and error message
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().write("No path specified");
             return;
-        } else if (!GET1.matcher(urlPath).matches()
-                && !GET2.matcher(urlPath).matches()
+        } else if (!GET2.matcher(urlPath).matches()
                 && !GET3.matcher(urlPath).matches() ) {
             // if the url sent is not in the specified format(that matches Pattern urlPattern),
             // the values read from splitting this url, do not give us valid values. In this case, send error
@@ -100,12 +99,24 @@ public class SkiLiftRideServlet extends HttpServlet {
             response.getWriter().write("The path specified is invalid");
             return;
         }
-        if (GET1.matcher(urlPath).matches()) {
-            out.println("YOU HIT PATTERN 1!</h1>");
-        } else if (GET2.matcher(urlPath).matches()) {
-            out.println("YOU HIT PATTERN 2!</h1>");
+
+
+        if (GET2.matcher(urlPath).matches()) {
+            response.setStatus(HttpServletResponse.SC_OK);
+
+            String key = Utilities.patternTwoKey(urlPath);
+            dbConnection = jPool.getResource();
+            Map record = dbConnection.hgetAll(key);
+            String skier = gObject.toJson(record);
+            response.getWriter().write(skier);
         } else if (GET3.matcher(urlPath).matches()) {
-            out.println("YOU HIT PATTERN 3!</h1>");
+            response.setStatus(HttpServletResponse.SC_OK);
+            //TODO: the key below is going to be new to my understanding and will be updated in the Utilities class
+            String key = Utilities.patternThreeKey(urlPath);
+            dbConnection = jPool.getResource();
+            Map record = dbConnection.hgetAll(key);
+            String skier = gObject.toJson(record);
+            response.getWriter().write(skier);
         }
 
     }
