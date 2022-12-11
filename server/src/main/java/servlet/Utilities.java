@@ -14,13 +14,13 @@ public class Utilities {
         String seasonId = urlParts[3];
         String dayId = urlParts[5];
         String skierId = urlParts[7];
-        return "skier:" + skierId + ":" + seasonId + ":" + dayId + ":" + resortId;
+        return "skiers:" + resortId + ":" + seasonId + ":" + dayId + ":" + skierId;
     }
 
     public static String patternThreeKey(String url){
         String[] urlParts = url.split("/");
         String skierId = urlParts[1];
-        return skierId;
+        return "skiers:" + skierId;
     }
 
     private boolean isValid(String path) {

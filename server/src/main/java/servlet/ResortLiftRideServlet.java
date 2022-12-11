@@ -127,7 +127,7 @@ public class ResortLiftRideServlet extends HttpServlet {
         String seasonId = String.valueOf(Integer.parseInt(urlParts[3]));
         String dayId = String.valueOf(Integer.parseInt(urlParts[5]));
 
-        return resortId + ":" + seasonId + ":" + dayId;
+        return "resort:" + resortId + ":" + seasonId + ":" + dayId;
     }
 
     private static JedisPoolConfig buildPoolConfig() {
