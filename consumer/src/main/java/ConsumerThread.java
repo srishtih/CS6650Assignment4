@@ -74,6 +74,50 @@ public class ConsumerThread implements Runnable {
     private boolean doWork(String message) {
         try{
             JSONObject body = new JSONObject(message);
+
+            String skierID = String.valueOf(body.getInt("skierId"));
+            String day = String.valueOf(body.getInt("dayId"));
+            String time= String.valueOf(body.getInt("timeId"));
+            int liftId = body.getInt("liftId");
+            String resortId = String.valueOf(body.getInt("resortId"));
+            String seasonId = String.valueOf(body.getInt("seasonId"));
+
+            dbConnection = Consumer.jPool.getResource();
+
+            //For GET Query 1
+            dbConnection.sadd("resort:" + resortId + ":" + seasonId + ":" + day, skierID);
+            
+            /*
+            dbConnection.sadd("SkierCount",
+                    "resort:" + resortId + ":" + seasonId + ":" + day + ":" + skierID);
+             */
+
+            //For GET Query 2
+            dbConnection.incrBy("skiers:" + resortId + ":" + seasonId + ":" + day + ":" + skierID,
+                    liftId*10);
+            dbConnection.sadd("SkierVertical",
+                    "skiers:" + resortId + ":" + seasonId + ":" + day + ":" + skierID );
+
+            //For GET Query 3
+            dbConnection.incrBy("skiers:" + skierID, liftId * 10);
+            dbConnection.sadd("SkierAllVertical", "skiers:" + skierID);
+
+            Consumer.jPool.returnResource(dbConnection);
+            return true;
+        } catch(Exception e){
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+}
+
+/*
+String field = skierID + " "+
+"season " + body.getString("seasonId") + " day " + body.getInt("dayId") + ":" +
+                    body.getInt("timeId");
+            String value = "resort " + body.getInt("resortId") + " lift " + body.getInt("liftId");
+
+
             Map<String, String> event = new HashMap<>();
             String skierID = body.getInt("skierId")+ ":" +  body.getString("seasonId") + ":" +
                     body.getInt("dayId") + ":"+ body.getInt("timeId");
@@ -86,22 +130,7 @@ public class ConsumerThread implements Runnable {
             dbConnection = Consumer.jPool.getResource();
             dbConnection.hmset("skier:"+skierID, event);
             dbConnection.sadd("LiftRides", "skier:"+skierID);
-            System.out.println("Success!!");
-            Consumer.jPool.returnResource(dbConnection);
-            return true;
-        } catch(Exception e){
-            e.printStackTrace();
-//            System.out.println(e.getMessage());
-            return false;
-        }
-    }
-}
 
-/*
-String field = skierID + " "+
-"season " + body.getString("seasonId") + " day " + body.getInt("dayId") + ":" +
-                    body.getInt("timeId");
-            String value = "resort " + body.getInt("resortId") + " lift " + body.getInt("liftId");
  */
 
 
