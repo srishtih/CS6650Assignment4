@@ -35,7 +35,7 @@ public class ResortLiftRideServlet extends HttpServlet {
     Jedis dbConnection;
 
     private final String SEASONS_PARAMETER = "seasons";
-    private final String DAYS_PARAMETER = "days";
+    private final String DAYS_PARAMETER = "day";
     private final String SKIERS_PARAMETER = "skiers";
     private final int DAY_ID_MIN = 1;
     private final int DAY_ID_MAX = 3;
@@ -74,7 +74,6 @@ public class ResortLiftRideServlet extends HttpServlet {
         response.setContentType("application/json");
         JsonObject values = new JsonObject();
         PrintWriter out = response.getWriter();
-        out.println("hey there");
 
         String urlPath = request.getPathInfo();
 
@@ -92,6 +91,7 @@ public class ResortLiftRideServlet extends HttpServlet {
             response.getWriter().write("Not a valid url");
         } else {
         response.setStatus(HttpServletResponse.SC_OK);
+            System.out.println("we are here");
 
         String resort_composite_key = createCompositeKey(urlParts);
         // connect with jedis
@@ -106,6 +106,7 @@ public class ResortLiftRideServlet extends HttpServlet {
     }
 
     private boolean isUrlValid(String[] urlPath, HttpServletRequest res) {
+        System.out.println(urlPath.length);
         if (urlPath.length == 7) {
             try {
                 for (int i = 1; i < urlPath.length; i+=2){
