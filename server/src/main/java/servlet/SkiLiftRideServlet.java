@@ -42,7 +42,7 @@ public class SkiLiftRideServlet extends HttpServlet {
     private Connection connection;
     private String QUEUE_NAME = "tester";
     private BlockingQueue<Channel> channelPool;
-    public static final JedisPool jPool = new JedisPool(Protocol.DEFAULT_HOST, 6379);
+    public static final JedisPool jPool = new JedisPool("35.165.209.121", 6379);
     Gson gObject  = new Gson();
     Jedis dbConnection;
 
@@ -53,7 +53,10 @@ public class SkiLiftRideServlet extends HttpServlet {
     @Override
     public void init(){
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
+        factory.setHost("54.203.66.122");
+        factory.setPort(5672);
+        factory.setUsername("admin");
+        factory.setPassword("rabbitmq");
         try {
             //One time connection establishment to EC2 instance hosting RabbitMQ
             this.connection= factory.newConnection();
@@ -106,17 +109,18 @@ public class SkiLiftRideServlet extends HttpServlet {
 
             String key = Utilities.patternTwoKey(urlPath);
             dbConnection = jPool.getResource();
-            Map record = dbConnection.hgetAll(key);
+            String record = String.valueOf(dbConnection.get(key));
             String skier = gObject.toJson(record);
-            response.getWriter().write(skier);
+            response.getWriter().write(record);
         } else if (GET3.matcher(urlPath).matches()) {
             response.setStatus(HttpServletResponse.SC_OK);
             //TODO: the key below is going to be new to my understanding and will be updated in the Utilities class
             String key = Utilities.patternThreeKey(urlPath);
+            System.out.println(key);
             dbConnection = jPool.getResource();
-            Map record = dbConnection.hgetAll(key);
+            String record = String.valueOf(dbConnection.get(key));
             String skier = gObject.toJson(record);
-            response.getWriter().write(skier);
+            response.getWriter().write(record);
         }
 
     }

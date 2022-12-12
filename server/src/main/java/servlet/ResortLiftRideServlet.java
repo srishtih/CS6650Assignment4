@@ -30,7 +30,7 @@ public class ResortLiftRideServlet extends HttpServlet {
     private BlockingQueue<Channel> channelPool;
     private String QUEUE_NAME = "resort";
     Gson g  = new Gson();
-    public static final JedisPool jPool = new JedisPool(buildPoolConfig(), Protocol.DEFAULT_HOST, 6379);
+    public static final JedisPool jPool = new JedisPool(buildPoolConfig(), "35.165.209.121", 6379);
 
     Jedis dbConnection;
 
@@ -45,9 +45,9 @@ public class ResortLiftRideServlet extends HttpServlet {
         super.init();
         ConnectionFactory factory = new ConnectionFactory();
         factory.setPort(5672);
-        factory.setHost("localhost");
-        factory.setUsername("test1");
-        factory.setPassword("test1");
+        factory.setHost("54.203.66.122");
+        factory.setUsername("admin");
+        factory.setPassword("rabbitmq");
 
         try {
             //One time connection establishment to EC2 instance hosting RabbitMQ
@@ -74,12 +74,13 @@ public class ResortLiftRideServlet extends HttpServlet {
         response.setContentType("application/json");
         JsonObject values = new JsonObject();
         PrintWriter out = response.getWriter();
+        out.println("hey there");
 
         String urlPath = request.getPathInfo();
 
         System.out.println(urlPath);
 
-        if (urlPath == null || urlPath.isEmpty()){
+        if (urlPath == null || urlPath.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().write("404: Missing url");
             return;
@@ -90,17 +91,18 @@ public class ResortLiftRideServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().write("Not a valid url");
         } else {
-            response.setStatus(HttpServletResponse.SC_OK);
+        response.setStatus(HttpServletResponse.SC_OK);
 
-            String resort_composite_key = createCompositeKey(urlParts);
-            // connect with jedis
-            // return the number of skiers
-            dbConnection = jPool.getResource();
-            Long numberOfSkiers = dbConnection.scard(resort_composite_key);
-            values.addProperty("resort", "Mission Ridge");
-            values.addProperty("numOfSkiers", numberOfSkiers);
-            response.getWriter().write(g.toJson(values));
+        String resort_composite_key = createCompositeKey(urlParts);
+        // connect with jedis
+        // return the number of skiers
+        dbConnection = jPool.getResource();
+        long numberOfSkiers = dbConnection.scard(resort_composite_key);
+        values.addProperty("resort", "Mission Ridge");
+        values.addProperty("numOfSkiers", numberOfSkiers);
+        response.getWriter().write(String.valueOf(numberOfSkiers));
         }
+
     }
 
     private boolean isUrlValid(String[] urlPath, HttpServletRequest res) {
@@ -126,8 +128,7 @@ public class ResortLiftRideServlet extends HttpServlet {
         String resortId = String.valueOf(Integer.parseInt(urlParts[1]));
         String seasonId = String.valueOf(Integer.parseInt(urlParts[3]));
         String dayId = String.valueOf(Integer.parseInt(urlParts[5]));
-
-        return resortId + ":" + seasonId + ":" + dayId;
+        return "resort:" + resortId + ":" + seasonId + ":" + dayId;
     }
 
     private static JedisPoolConfig buildPoolConfig() {

@@ -1,5 +1,6 @@
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import org.apache.log4j.BasicConfigurator;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Protocol;
@@ -17,8 +18,8 @@ import java.util.concurrent.TimeoutException;
  */
 public class Consumer {
     protected static final String QUEUE_NAME = "tester";
-    private static final Integer NUM_THREADS = 1000;
-    public static final JedisPool jPool = new JedisPool(Protocol.DEFAULT_HOST, 6379);
+    private static final Integer NUM_THREADS = 128;
+    public static final JedisPool jPool = new JedisPool("35.165.209.121", 6379);
 
 
     /**
@@ -30,8 +31,10 @@ public class Consumer {
     public static void main(String[] args) throws TimeoutException, IOException {
         //Initialization
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
+        factory.setHost("54.203.66.122");
         factory.setPort(5672);
+        factory.setUsername("admin");
+        factory.setPassword("rabbitmq");
 //        factory.setUsername("admin");
 //        factory.setPassword("rabbitmq");
         Connection connection = factory.newConnection();

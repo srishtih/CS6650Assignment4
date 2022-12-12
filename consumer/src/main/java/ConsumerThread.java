@@ -95,12 +95,12 @@ public class ConsumerThread implements Runnable {
             //For GET Query 2
             dbConnection.incrBy("skiers:" + resortId + ":" + seasonId + ":" + day + ":" + skierID,
                     liftId*10);
-            dbConnection.sadd("SkierVertical",
-                    "skiers:" + resortId + ":" + seasonId + ":" + day + ":" + skierID );
+            //dbConnection.sadd("SkierVertical",
+            //        "skiers:" + resortId + ":" + seasonId + ":" + day + ":" + skierID );
 
             //For GET Query 3
-            dbConnection.incrBy("skiers:" + skierID, liftId * 10);
-            dbConnection.sadd("SkierAllVertical", "skiers:" + skierID);
+            dbConnection.incrBy("skiersoverall:" + skierID, liftId * 10);
+            //dbConnection.sadd("SkierAllVertical", "skiers:" + skierID);
 
             Consumer.jPool.returnResource(dbConnection);
             return true;
